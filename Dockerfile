@@ -23,7 +23,7 @@ ENV APP_VERSION=$VERSION
 # Publish the app for the target architecture
 RUN dotnet publish --runtime linux-${TARGETARCH} --self-contained false -p:AssemblyVersion=$VERSION -o /app
 
-# Stage 3: Build frontend with Node.js
+# Stage 3: Build ImmichFrame frontend with Node.js
 FROM node:22-alpine AS build-node
 
 USER node
@@ -34,6 +34,17 @@ COPY --chown=node:node ./immichFrame.Web/package*.json ./
 RUN npm i
 COPY --chown=node:node ./immichFrame.Web ./
 RUN npm run build && npm prune --omit=dev
+
+# Stage 3b: Build snapweb (Snapcast web client) at /audio/ base path
+FROM node:22-alpine AS build-snapweb
+
+USER node
+WORKDIR /app
+COPY --chown=node:node ./snapweb/package*.json ./
+
+RUN npm i
+COPY --chown=node:node ./snapweb ./
+RUN npm run build
 
 # Stage 4: Final production stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy AS final
@@ -47,6 +58,7 @@ ENV APP_VERSION=$VERSION
 # Copy .NET API and frontend assets
 COPY --from=publish-api /app ./
 COPY --from=build-node /app/build ./wwwroot
+COPY --from=build-snapweb /app/dist ./wwwroot/audio
 
 # Set non-privileged user
 ARG APP_UID=1000

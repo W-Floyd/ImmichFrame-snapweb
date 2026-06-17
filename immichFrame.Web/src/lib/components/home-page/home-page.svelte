@@ -12,6 +12,7 @@
 	import Clock from '../elements/clock.svelte';
 	import Appointments from '../elements/appointments.svelte';
 	import LoadingElement from '../elements/LoadingElement.svelte';
+	import SnapAudio from '../elements/snap-audio.svelte';
 	import { page } from '$app/state';
 	import { ProgressBarLocation, ProgressBarStatus } from '../elements/progress-bar.types';
 	import { isImageAsset, isVideoAsset } from '$lib/constants/asset-type';
@@ -618,5 +619,9 @@
 		/>
 	{:else}
 		<LoadingElement />
+	{/if}
+
+	{#if $configStore.snapAudio}
+		<SnapAudio snapserverUrl={$configStore.snapserverUrl} />
 	{/if}
 </section>

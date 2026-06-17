@@ -66,6 +66,8 @@
         public bool PlayAudio { get; }
         public string Layout { get; }
         public string Language { get; }
+        public bool SnapAudio { get; }
+        public string? SnapserverUrl { get; }
 
         public void Validate();
     }

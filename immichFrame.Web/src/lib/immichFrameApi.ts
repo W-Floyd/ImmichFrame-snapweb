@@ -214,6 +214,8 @@ export type ClientSettingsDto = {
     playAudio?: boolean;
     layout?: string | null;
     language?: string | null;
+    snapAudio?: boolean;
+    snapserverUrl?: string | null;
 };
 export type IWeather = {
     location?: string | null;
