@@ -438,6 +438,14 @@
 		window.addEventListener('mousemove', showCursor);
 		window.addEventListener('click', showCursor);
 
+		const enterFullscreen = () => {
+			if (!document.fullscreenElement) {
+				document.documentElement.requestFullscreen().catch(() => {});
+			}
+			document.removeEventListener('click', enterFullscreen);
+		};
+		document.addEventListener('click', enterFullscreen);
+
 		// 30 second reload on error
 		refreshInterval = window.setInterval(() => {
 			if (error) window.location.reload();
