@@ -14,6 +14,7 @@
 	import LoadingElement from '../elements/LoadingElement.svelte';
 	import SnapAudio from '../elements/snap-audio.svelte';
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 	import { ProgressBarLocation, ProgressBarStatus } from '../elements/progress-bar.types';
 	import { isImageAsset, isVideoAsset } from '$lib/constants/asset-type';
 
@@ -614,6 +615,11 @@
 			bind:status={progressBarStatus}
 			bind:infoVisible
 			overlayVisible={cursorVisible}
+			goToSettings={() => {
+				const secret = $authSecretStore;
+				const params = secret ? `?authsecret=${encodeURIComponent(secret)}` : '';
+				goto(`/settings${params}`);
+			}}
 		/>
 
 		<ProgressBar

@@ -1,11 +1,11 @@
 using ImmichFrame.Core.Helpers;
 using ImmichFrame.Core.Interfaces;
+using ImmichFrame.WebApi.Helpers.Config;
 using ImmichFrame.WebApi.Models;
 using Microsoft.AspNetCore.Authentication;
 using System.Reflection;
 using ImmichFrame.Core.Logic;
 using ImmichFrame.Core.Logic.AccountSelection;
-using ImmichFrame.WebApi.Helpers.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 //log the version number
@@ -51,7 +51,9 @@ var configPath = Environment.GetEnvironmentVariable("IMMICHFRAME_CONFIG_PATH") ?
         .FirstOrDefault(d => string.Equals(Path.GetFileName(d), "Config", StringComparison.OrdinalIgnoreCase))
         ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config");
 builder.Services.AddTransient<ConfigLoader>();
+builder.Services.AddSingleton(new ConfigPathProvider(configPath));
 builder.Services.AddSingleton<IServerSettings>(srv => srv.GetRequiredService<ConfigLoader>().LoadConfig(configPath));
+builder.Services.AddTransient<ConfigSaveService>();
 
 // Register sub-settings
 builder.Services.AddSingleton<IGeneralSettings>(srv => srv.GetRequiredService<IServerSettings>().GeneralSettings);

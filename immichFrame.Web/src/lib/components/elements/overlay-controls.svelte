@@ -4,7 +4,8 @@
 		mdiPlay,
 		mdiPause,
 		mdiChevronLeft,
-		mdiInformationOutline
+		mdiInformationOutline,
+		mdiCog
 	} from '@mdi/js';
 	import Icon from './icon.svelte';
 	import { ProgressBarStatus } from './progress-bar.types';
@@ -17,6 +18,7 @@
 		back: () => void;
 		pause: () => void;
 		showInfo: () => void;
+		goToSettings: () => void;
 	}
 
 	let {
@@ -26,7 +28,8 @@
 		next,
 		back,
 		pause,
-		showInfo
+		showInfo,
+		goToSettings
 	}: Props = $props();
 
 	function shortcuts(node: any, shortcutList: any[]) {
@@ -64,6 +67,10 @@
 		{
 			key: 'i',
 			action: showInfo
+		},
+		{
+			key: 's',
+			action: goToSettings
 		}
 	];
 </script>
@@ -106,8 +113,15 @@
 				</button>
 			</div>
 
-			<div class="group grid place-items-center">
-				<!-- <button class="opacity-0 hover:opacity-100 text-primary"> </button> -->
+			<div id="overlaySettings" class="group grid place-items-center">
+				<button class="opacity-0 hover:opacity-100 text-primary" onclick={goToSettings}>
+					<Icon
+						title="Settings"
+						class="max-h-[min(10rem,33vh)] max-w-[min(10rem,33vh)] h-[33vh] w-[33vw]"
+						path={mdiCog}
+						size=""
+					/>
+				</button>
 			</div>
 		</div>
 
