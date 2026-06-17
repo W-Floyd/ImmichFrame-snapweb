@@ -9,6 +9,8 @@
     "ImageFill": true,
     "PlayAudio": true,
     "Layout": "Layout_TEST",
+    "SnapAudio": true,
+    "SnapserverUrl": "SnapserverUrl_TEST",
     "DownloadImages": true,
     "ShowMemories": true,
     "ShowFavorites": true,
