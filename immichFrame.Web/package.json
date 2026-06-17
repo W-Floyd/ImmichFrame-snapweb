@@ -38,5 +38,10 @@
 		"typescript-eslint": "^8.0.0",
 		"vite": "^7.1.9"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"libflacjs": "^5.4.0",
+		"opus-decoder": "^0.7.11",
+		"standardized-audio-context": "^25.3.77"
+	}
 }

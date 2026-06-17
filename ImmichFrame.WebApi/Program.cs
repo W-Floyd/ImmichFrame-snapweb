@@ -110,9 +110,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Serve snapweb SPA for all /audio/* paths that don't resolve to a static file
-app.MapFallback("/audio/{**path}", () => Results.File("audio/index.html", "text/html"));
-
 app.MapFallbackToFile("/index.html");
 
 app.Run();

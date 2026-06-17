@@ -35,21 +35,6 @@ RUN npm i
 COPY --chown=node:node ./immichFrame.Web ./
 RUN npm run build && npm prune --omit=dev
 
-# Stage 3b: Build snapweb (Snapcast web client) at /audio/ base path
-# Force amd64: @swc/core (used by plugin-react-swc) has no arm/v7 prebuilt binary.
-# The output is static files so the build platform doesn't affect the result.
-FROM --platform=linux/amd64 node:22-alpine AS build-snapweb
-
-USER node
-WORKDIR /app
-# Copy only package.json (not the lock file) so npm resolves platform-specific
-# optional deps (e.g. @rollup/rollup-linux-arm64-musl) for the Alpine target.
-COPY --chown=node:node ./snapweb/package.json ./
-
-RUN npm install
-COPY --chown=node:node ./snapweb ./
-RUN npm run build
-
 # Stage 4: Final production stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy AS final
 
@@ -62,7 +47,6 @@ ENV APP_VERSION=$VERSION
 # Copy .NET API and frontend assets
 COPY --from=publish-api /app ./
 COPY --from=build-node /app/build ./wwwroot
-COPY --from=build-snapweb /app/dist ./wwwroot/audio
 
 # Set non-privileged user
 ARG APP_UID=1000
