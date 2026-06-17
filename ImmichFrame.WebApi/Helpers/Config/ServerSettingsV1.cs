@@ -135,6 +135,8 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public bool PlayAudio => _delegate.PlayAudio;
         public string Layout => _delegate.Layout;
         public string Language => _delegate.Language;
+        public bool SnapAudio => false;
+        public string? SnapserverUrl => null;
 
         public void Validate() { }
     }
