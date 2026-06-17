@@ -477,10 +477,9 @@ class SnapControl {
         const msg: any = {
             id: ++this.msg_id,
             jsonrpc: '2.0',
-            method: method
+            method: method,
+            params: params ?? {}
         };
-        if (params)
-            msg.params = params;
 
         const msgJson = JSON.stringify(msg);
         console.debug("Sending: " + msgJson);

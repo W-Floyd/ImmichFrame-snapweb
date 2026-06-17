@@ -229,14 +229,14 @@ class HelloMessage extends JsonMessage {
     }
 
     serialize(): ArrayBuffer {
-        this.json = { "MAC": this.mac, "HostName": this.hostname, "Version": this.version, "ClientName": this.clientName, "OS": this.os, "Arch": this.arch, "Instance": this.instance, "ID": this.uniqueId, "SnapStreamProtocolVersion": this.snapStreamProtocolVersion };
+        this.json = { "MAC": this.mac, "HostName": this.hostname, "Version": this.version, "ClientName": this.clientName, "OS": this.os, "Arch": this.arch, "Instance": this.instance, "ID": this.uniqueId, "SnapStreamProtocolVersion": this.snapStreamProtocolVersion, "Auth": { "param": "", "scheme": "" } };
         return super.serialize();
     }
 
     mac: string = "";
     hostname: string = "";
-    version: string = import.meta.env.VITE_APP_VERSION;
-    clientName = import.meta.env.VITE_APP_NAME;
+    version: string = import.meta.env.VITE_APP_VERSION ?? "0.0.1";
+    clientName: string = import.meta.env.VITE_APP_NAME ?? "ImmichFrame";
     os: string = "";
     arch: string = "web";
     instance: number = 1;
