@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
-	import { SnapControl } from '$lib/snapclient/snapcontrol';
 	import { SnapStream } from '$lib/snapclient/snapstream';
 
 	interface Props {
@@ -19,7 +18,6 @@
 	type AudioState = 'idle' | 'connecting' | 'playing' | 'stopped' | 'failed';
 	let audioState: AudioState = $state('idle');
 
-	let snapControl: SnapControl | null = null;
 	let snapStream: SnapStream | null = null;
 
 	function startStream() {
@@ -77,27 +75,12 @@
 		}
 	}
 
-	function connectControl() {
-		snapControl = new SnapControl();
-		snapControl.onConnectionChanged = (_ctrl, connected) => {
-			if (!connected && audioState === 'playing') {
-				stopStream();
-				audioState = 'connecting';
-				// Reconnect control; stream will restart on next connection.
-				setTimeout(connectControl, 3000);
-			}
-		};
-		snapControl.connect(resolveWsUrl());
-	}
-
 	onMount(() => {
-		connectControl();
 		tryAutoplay();
 	});
 
 	onDestroy(() => {
 		stopStream();
-		snapControl?.disconnect();
 	});
 </script>
 
