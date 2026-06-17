@@ -23,8 +23,22 @@
 
 	let snapStream: SnapStream | null = null;
 	let snapControl: SnapControl | null = null;
+	let silenceCtx: AudioContext | null = null;
 
 	const clientId = SnapStream.getClientId();
+
+	// Keep a looping silent AudioContext alive once the user unlocks audio.
+	// Browsers won't sleep/defocus a page that has a running audio graph.
+	function ensureSilenceLoop() {
+		if (silenceCtx) return;
+		silenceCtx = new AudioContext();
+		const buf = silenceCtx.createBuffer(1, silenceCtx.sampleRate, silenceCtx.sampleRate);
+		const src = silenceCtx.createBufferSource();
+		src.buffer = buf;
+		src.loop = true;
+		src.connect(silenceCtx.destination);
+		src.start();
+	}
 
 	function startStream() {
 		const url = resolveWsUrl();
@@ -89,6 +103,7 @@
 			src.connect(ctx.destination);
 			src.start(0);
 			await ctx.close();
+			ensureSilenceLoop();
 			startStream();
 		} catch {
 			audioState = 'failed';
@@ -109,6 +124,8 @@
 
 	onDestroy(() => {
 		stopStream();
+		silenceCtx?.close();
+		silenceCtx = null;
 	});
 </script>
 
