@@ -1,5 +1,6 @@
 import Flac from 'libflacjs/dist/libflac.js'
-import { AudioContext, IAudioBuffer, IAudioContext, IAudioBufferSourceNode, IGainNode } from 'standardized-audio-context'
+import { AudioContext } from 'standardized-audio-context'
+import type { IAudioBuffer, IAudioContext, IAudioBufferSourceNode, IGainNode } from 'standardized-audio-context'
 import { OpusDecoder as WasmOpusDecoder } from "opus-decoder";
 
 function getPersistentValue(key: string, defaultValue: string = ""): string {
