@@ -36,7 +36,9 @@ COPY --chown=node:node ./immichFrame.Web ./
 RUN npm run build && npm prune --omit=dev
 
 # Stage 3b: Build snapweb (Snapcast web client) at /audio/ base path
-FROM node:22-alpine AS build-snapweb
+# Force amd64: @swc/core (used by plugin-react-swc) has no arm/v7 prebuilt binary.
+# The output is static files so the build platform doesn't affect the result.
+FROM --platform=linux/amd64 node:22-alpine AS build-snapweb
 
 USER node
 WORKDIR /app
