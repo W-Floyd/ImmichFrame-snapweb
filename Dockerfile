@@ -40,9 +40,11 @@ FROM node:22-alpine AS build-snapweb
 
 USER node
 WORKDIR /app
-COPY --chown=node:node ./snapweb/package*.json ./
+# Copy only package.json (not the lock file) so npm resolves platform-specific
+# optional deps (e.g. @rollup/rollup-linux-arm64-musl) for the Alpine target.
+COPY --chown=node:node ./snapweb/package.json ./
 
-RUN npm i
+RUN npm install
 COPY --chown=node:node ./snapweb ./
 RUN npm run build
 
