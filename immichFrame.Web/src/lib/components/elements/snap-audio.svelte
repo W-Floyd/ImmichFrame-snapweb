@@ -107,19 +107,17 @@
 	});
 </script>
 
-<!-- Tap-to-play overlay when autoplay was blocked -->
+<!-- Tap-to-play badge when autoplay was blocked -->
 {#if audioState === 'failed' || audioState === 'stopped'}
 	<button
 		type="button"
 		onclick={handlePlayClick}
-		class="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3
-		       bg-black/40 backdrop-blur-sm text-white cursor-pointer border-0"
+		class="fixed bottom-4 right-4 z-[110] flex items-center gap-2
+		       rounded-full bg-black/70 px-4 py-2 text-white backdrop-blur-sm border-0 cursor-pointer"
 		aria-label="Tap to start audio"
 	>
-		<span class="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-4xl">
-			▶
-		</span>
-		<span class="text-sm font-medium tracking-wide opacity-80">Tap to start audio</span>
+		<span class="text-base">▶</span>
+		<span class="text-sm font-medium">Tap to start audio</span>
 	</button>
 {/if}
 
@@ -128,7 +126,7 @@
 	<button
 		type="button"
 		onclick={handlePlayClick}
-		class="fixed bottom-4 right-4 z-40 flex items-center gap-1.5
+		class="fixed bottom-4 right-4 z-[110] flex items-center gap-1.5
 		       rounded-full bg-black/50 px-3 py-1.5 text-white backdrop-blur-sm border-0 cursor-pointer"
 		title="Audio playing — click to stop"
 		aria-label="Audio playing"
@@ -140,7 +138,7 @@
 <!-- Subtle connecting indicator -->
 {#if audioState === 'connecting'}
 	<div
-		class="fixed bottom-4 right-4 z-40 flex items-center gap-1.5
+		class="fixed bottom-4 right-4 z-[110] flex items-center gap-1.5
 		       rounded-full bg-black/40 px-3 py-1.5 text-white/60 backdrop-blur-sm"
 		aria-label="Connecting to audio"
 	>
