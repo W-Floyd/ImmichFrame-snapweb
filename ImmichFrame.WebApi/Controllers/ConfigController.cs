@@ -61,7 +61,12 @@ namespace ImmichFrame.WebApi.Controllers
         {
             try
             {
-                _configSaveService.Save(settings);
+                var warning = _configSaveService.Save(settings);
+                if (warning is not null)
+                {
+                    _logger.LogWarning("Settings applied in memory but not persisted: {Warning}", warning);
+                    return Ok(new { message = warning });
+                }
                 return Ok(new { message = "Settings saved. Account changes require a server restart." });
             }
             catch (Exception ex)

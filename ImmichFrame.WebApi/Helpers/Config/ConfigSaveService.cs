@@ -7,37 +7,54 @@ namespace ImmichFrame.WebApi.Helpers.Config;
 
 public class ConfigSaveService(ConfigPathProvider pathProvider, IServerSettings serverSettings)
 {
-    public void Save(ServerSettings updated)
+    /// <summary>
+    /// Applies <paramref name="updated"/> in memory immediately, then attempts to persist to disk.
+    /// </summary>
+    /// <returns>
+    /// <c>null</c> on full success; a human-readable warning string when the in-memory update
+    /// succeeded but the file could not be written (e.g. read-only filesystem).
+    /// </returns>
+    public string? Save(ServerSettings updated)
     {
-        var dir = pathProvider.ConfigPath;
-
-        if (!Directory.Exists(dir))
-            Directory.CreateDirectory(dir);
-
-        var jsonPath = Path.Combine(dir, "Settings.json");
-        var ymlPath = Path.Combine(dir, "Settings.yml");
-        var yamlPath = Path.Combine(dir, "Settings.yaml");
-
-        string targetPath;
-        bool useJson;
-
-        if (File.Exists(jsonPath)) { targetPath = jsonPath; useJson = true; }
-        else if (File.Exists(ymlPath)) { targetPath = ymlPath; useJson = false; }
-        else if (File.Exists(yamlPath)) { targetPath = yamlPath; useJson = false; }
-        else { targetPath = jsonPath; useJson = true; }
-
-        if (useJson)
-        {
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            File.WriteAllText(targetPath, JsonSerializer.Serialize(updated, options));
-        }
-        else
-        {
-            var serializer = new SerializerBuilder().Build();
-            File.WriteAllText(targetPath, serializer.Serialize(updated));
-        }
-
+        // Always apply in memory first so settings take effect regardless of disk state.
         UpdateGeneralSettingsInMemory(updated.GeneralSettingsImpl ?? new GeneralSettings());
+
+        try
+        {
+            var dir = pathProvider.ConfigPath;
+
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            var jsonPath = Path.Combine(dir, "Settings.json");
+            var ymlPath = Path.Combine(dir, "Settings.yml");
+            var yamlPath = Path.Combine(dir, "Settings.yaml");
+
+            string targetPath;
+            bool useJson;
+
+            if (File.Exists(jsonPath)) { targetPath = jsonPath; useJson = true; }
+            else if (File.Exists(ymlPath)) { targetPath = ymlPath; useJson = false; }
+            else if (File.Exists(yamlPath)) { targetPath = yamlPath; useJson = false; }
+            else { targetPath = jsonPath; useJson = true; }
+
+            if (useJson)
+            {
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                File.WriteAllText(targetPath, JsonSerializer.Serialize(updated, options));
+            }
+            else
+            {
+                var serializer = new SerializerBuilder().Build();
+                File.WriteAllText(targetPath, serializer.Serialize(updated));
+            }
+
+            return null;
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+        {
+            return $"Settings applied for this session but could not be saved to disk: {ex.Message}";
+        }
     }
 
     private void UpdateGeneralSettingsInMemory(GeneralSettings src)
