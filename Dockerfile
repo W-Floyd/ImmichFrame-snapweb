@@ -48,8 +48,9 @@ ENV APP_VERSION=$VERSION
 COPY --from=publish-api /app ./
 COPY --from=build-node /app/build ./wwwroot
 
-# Set non-privileged user
+# Create config directory with correct ownership before dropping privileges
 ARG APP_UID=1000
+RUN mkdir -p /app/Config && chown $APP_UID /app/Config
 USER $APP_UID
 
 ENTRYPOINT ["dotnet", "ImmichFrame.WebApi.dll"]
