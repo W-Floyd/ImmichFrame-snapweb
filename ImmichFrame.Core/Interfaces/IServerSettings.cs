@@ -68,6 +68,10 @@
         public string Language { get; }
         public bool SnapAudio { get; }
         public string? SnapserverUrl { get; }
+        public string? OidcAuthority { get; }
+        public string? OidcClientId { get; }
+        public string? OidcScopes { get; }
+        public bool OidcProtectFrame { get; }
 
         public void Validate();
     }

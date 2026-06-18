@@ -17,6 +17,8 @@
 	import { goto } from '$app/navigation';
 	import { ProgressBarLocation, ProgressBarStatus } from '../elements/progress-bar.types';
 	import { isImageAsset, isVideoAsset } from '$lib/constants/asset-type';
+	import { fetchOidcConfig, signinRedirect, getAccessToken } from '$lib/oidc';
+	import { initOidc } from '$lib/index';
 
 	interface AssetsState {
 		assets: [string, api.AssetResponseDto, api.AlbumResponseDto[]][];
@@ -75,6 +77,7 @@
 	let refreshInterval: number;
 
 	let cursorVisible = $state(true);
+	let authChecked = $state(false);
 
 	const clientIdentifier = page.url.searchParams.get('client');
 	const authsecret = page.url.searchParams.get('authsecret');
@@ -436,6 +439,21 @@
 	}
 
 	onMount(() => {
+		// OIDC gate: check auth async before revealing the frame
+		(async () => {
+			const oidcCfg = await fetchOidcConfig();
+			if (oidcCfg.enabled && oidcCfg.protectFrame) {
+				await initOidc();
+				const token = await getAccessToken();
+				if (!token) {
+					signinRedirect('/');
+					return;
+				}
+			}
+			authChecked = true;
+			getNextAssets();
+		})();
+
 		window.addEventListener('mousemove', showCursor);
 		window.addEventListener('click', showCursor);
 
@@ -478,8 +496,6 @@
 			}
 		});
 
-		getNextAssets();
-
 		return () => {
 			window.removeEventListener('mousemove', showCursor);
 			window.removeEventListener('click', showCursor);
@@ -512,6 +528,9 @@
 	});
 </script>
 
+{#if !authChecked}
+	<div class="fixed inset-0 bg-black"></div>
+{:else}
 <section class="fixed grid h-dvh-safe w-screen bg-black" class:cursor-none={!cursorVisible}>
 	{#if error}
 		<ErrorElement {authError} message={errorMessage} />
@@ -639,3 +658,4 @@
 		<SnapAudio snapserverUrl={$configStore.snapserverUrl} />
 	{/if}
 </section>
+{/if}

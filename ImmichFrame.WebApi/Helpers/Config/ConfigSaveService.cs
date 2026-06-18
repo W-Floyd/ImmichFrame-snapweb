@@ -150,5 +150,9 @@ public class ConfigSaveService(ConfigPathProvider pathProvider, IServerSettings 
         dst.WeatherLatLong = src.WeatherLatLong;
         dst.Webhook = src.Webhook;
         dst.AuthenticationSecret = src.AuthenticationSecret;
+        dst.OidcAuthority = src.OidcAuthority;
+        dst.OidcClientId = src.OidcClientId;
+        dst.OidcScopes = src.OidcScopes;
+        dst.OidcProtectFrame = src.OidcProtectFrame;
     }
 }

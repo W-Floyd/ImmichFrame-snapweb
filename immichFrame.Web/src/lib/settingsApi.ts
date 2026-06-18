@@ -38,6 +38,10 @@ export type GeneralSettingsDto = {
 	weatherLatLong?: string | null;
 	webhook?: string | null;
 	authenticationSecret?: string | null;
+	oidcAuthority?: string | null;
+	oidcClientId?: string | null;
+	oidcScopes?: string | null;
+	oidcProtectFrame?: boolean;
 };
 
 export type AccountSettingsDto = {

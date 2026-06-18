@@ -116,6 +116,10 @@ namespace ImmichFrame.WebApi.Controllers
             WeatherLatLong = src.WeatherLatLong,
             Webhook = src.Webhook,
             AuthenticationSecret = src.AuthenticationSecret,
+            OidcAuthority = src.OidcAuthority,
+            OidcClientId = src.OidcClientId,
+            OidcScopes = src.OidcScopes,
+            OidcProtectFrame = src.OidcProtectFrame,
         };
 
         private static ServerAccountSettings MapAccountSettings(IAccountSettings src) => new()

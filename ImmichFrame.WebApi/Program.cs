@@ -79,7 +79,20 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization(options => { options.AddPolicy("AllowAnonymous", policy => policy.RequireAssertion(context => true)); });
 
 builder.Services.AddAuthentication("ImmichFrameScheme")
-    .AddScheme<AuthenticationSchemeOptions, ImmichFrameAuthenticationHandler>("ImmichFrameScheme", options => { });
+    .AddScheme<AuthenticationSchemeOptions, ImmichFrameAuthenticationHandler>("ImmichFrameScheme", options => { })
+    .AddJwtBearer("OidcBearer");
+
+builder.Services.AddOptions<Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerOptions>("OidcBearer")
+    .Configure<IGeneralSettings>((options, settings) =>
+    {
+        options.Authority = settings.OidcAuthority;
+        options.RequireHttpsMetadata = settings.OidcAuthority?.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ?? false;
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateAudience = !string.IsNullOrEmpty(settings.OidcClientId),
+            ValidAudiences = string.IsNullOrEmpty(settings.OidcClientId) ? null : [settings.OidcClientId],
+        };
+    });
 
 var app = builder.Build();
 

@@ -5,6 +5,8 @@
 	import { init } from '$lib/index';
 	import { authSecretStore } from '$lib/stores/persist.store';
 	import { getFullSettings, saveSettings, type FullSettingsDto, type AccountSettingsDto } from '$lib/settingsApi';
+	import { fetchOidcConfig, signinRedirect, getAccessToken, type OidcConfig } from '$lib/oidc';
+	import { initOidc } from '$lib/index';
 
 	let settings: FullSettingsDto = $state({});
 	let loading = $state(true);
@@ -13,6 +15,8 @@
 	let successMsg = $state('');
 	let envVars = $state<string | null>(null);
 	let envVarsCopied = $state(false);
+	let oidcConfig = $state<OidcConfig | null>(null);
+	let oidcSignedIn = $state(false);
 
 	const authsecret = page.url.searchParams.get('authsecret');
 	if (authsecret && authsecret !== $authSecretStore) {
@@ -21,6 +25,11 @@
 	}
 
 	onMount(async () => {
+		[oidcConfig] = await Promise.all([
+			fetchOidcConfig(),
+			initOidc(),
+		]);
+		oidcSignedIn = oidcConfig.enabled ? !!(await getAccessToken()) : false;
 		try {
 			settings = await getFullSettings();
 		} catch (e: unknown) {
@@ -92,6 +101,17 @@
 			<h1 class="text-lg font-semibold">Settings</h1>
 		</div>
 		<div class="flex items-center gap-3">
+			{#if oidcConfig?.enabled && !oidcSignedIn}
+				<button
+					onclick={() => signinRedirect('/settings')}
+					class="rounded-lg border border-white/20 px-4 py-2 text-sm font-medium text-white/70 hover:border-white/40 hover:text-white transition-colors"
+				>
+					Sign in with SSO
+				</button>
+			{/if}
+			{#if oidcConfig?.enabled && oidcSignedIn}
+				<span class="text-sm text-white/40">SSO ✓</span>
+			{/if}
 			{#if successMsg}
 				<span class="text-sm text-green-400">{successMsg}</span>
 			{/if}
@@ -357,6 +377,36 @@
 					<label class="flex flex-col gap-1">
 						<span class="text-sm text-white/60">Authentication Secret</span>
 						<input type="password" autocomplete="new-password" bind:value={settings.General!.authenticationSecret} class="settings-input" />
+					</label>
+				</div>
+			</section>
+
+			<hr class="border-white/10" />
+
+			<!-- OIDC -->
+			<section>
+				<h2 class="mb-4 text-base font-semibold text-white/80 uppercase tracking-wider">OIDC / SSO</h2>
+				<div class="grid grid-cols-2 gap-4">
+					<label class="col-span-2 flex flex-col gap-1">
+						<span class="text-sm text-white/60">Authority URL</span>
+						<input
+							type="url"
+							bind:value={settings.General!.oidcAuthority}
+							class="settings-input"
+							placeholder="https://auth.example.com/realms/myrealm"
+						/>
+					</label>
+					<label class="flex flex-col gap-1">
+						<span class="text-sm text-white/60">Client ID</span>
+						<input type="text" bind:value={settings.General!.oidcClientId} class="settings-input" placeholder="immichframe" />
+					</label>
+					<label class="flex flex-col gap-1">
+						<span class="text-sm text-white/60">Scopes</span>
+						<input type="text" bind:value={settings.General!.oidcScopes} class="settings-input" placeholder="openid profile" />
+					</label>
+					<label class="settings-toggle col-span-2">
+						<input type="checkbox" bind:checked={settings.General!.oidcProtectFrame} />
+						<span>Require login to view frame</span>
 					</label>
 				</div>
 			</section>

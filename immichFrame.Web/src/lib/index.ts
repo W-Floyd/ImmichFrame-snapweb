@@ -1,6 +1,7 @@
 // place files you want to import through the `$lib` alias in this folder.
 import { defaults } from './immichFrameApi.js';
 import { authSecretStore } from '$lib/stores/persist.store';
+import { fetchOidcConfig, getOrCreateManager, getAccessToken } from '$lib/oidc';
 import { get } from 'svelte/store';
 
 export * from './immichFrameApi.js';
@@ -39,6 +40,29 @@ export const sendAuthSecretToServiceWorker = () => {
 			}
 		});
 	}
+};
+
+// Sets the Bearer token from OIDC if a valid session exists, returns true if used.
+export const initOidc = async (): Promise<boolean> => {
+	const config = await fetchOidcConfig();
+	if (!config.enabled) return false;
+	const mgr = getOrCreateManager(config);
+	const token = await getAccessToken();
+	if (token) {
+		defaults.headers = defaults.headers ?? {};
+		(defaults.headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+		sendAuthSecretToServiceWorker();
+		// Refresh token silently in the background when it's close to expiry
+		mgr.events.addAccessTokenExpiring(() => {
+			mgr.signinSilent().then((user) => {
+				if (user) {
+					(defaults.headers as Record<string, string>)['Authorization'] = `Bearer ${user.access_token}`;
+				}
+			}).catch(() => {});
+		});
+		return true;
+	}
+	return false;
 };
 
 export const getBaseUrl = () => defaults.baseUrl;

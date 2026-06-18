@@ -1,16 +1,21 @@
+using ImmichFrame.Core.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 
-public class CustomAuthenticationMiddleware
+public class CustomAuthenticationMiddleware(RequestDelegate next, IGeneralSettings settings)
 {
-    private readonly RequestDelegate _next;
-
-    public CustomAuthenticationMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
+        if (!string.IsNullOrEmpty(settings.OidcAuthority))
+        {
+            var oidcResult = await context.AuthenticateAsync("OidcBearer");
+            if (oidcResult.Succeeded)
+            {
+                context.User = oidcResult.Principal!;
+                await next(context);
+                return;
+            }
+        }
+
         var result = await context.AuthenticateAsync("ImmichFrameScheme");
 
         if (!result.Succeeded)
@@ -20,6 +25,6 @@ public class CustomAuthenticationMiddleware
             return;
         }
 
-        await _next(context);
+        await next(context);
     }
 }
