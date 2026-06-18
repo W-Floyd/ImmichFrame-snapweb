@@ -21,7 +21,7 @@ public class ConfigLoaderTest
     {
         _testDataPath = TestContext.CurrentContext.TestDirectory;
         var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        _configLoader = new ConfigLoader(loggerFactory.CreateLogger<ConfigLoader>());
+        _configLoader = new ConfigLoader(loggerFactory.CreateLogger<ConfigLoader>(), new ConfigSourceProvider());
     }
 
     [Test]

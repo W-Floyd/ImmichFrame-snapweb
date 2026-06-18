@@ -37,7 +37,11 @@
     "PlayAudio": true,
     "Layout": "Layout_TEST",
     "SnapAudio": true,
-    "SnapserverUrl": "SnapserverUrl_TEST"
+    "SnapserverUrl": "SnapserverUrl_TEST",
+    "OidcAuthority": "OidcAuthority_TEST",
+    "OidcClientId": "OidcClientId_TEST",
+    "OidcScopes": "OidcScopes_TEST",
+    "OidcProtectFrame": true
   },
   "Accounts": [
     {
