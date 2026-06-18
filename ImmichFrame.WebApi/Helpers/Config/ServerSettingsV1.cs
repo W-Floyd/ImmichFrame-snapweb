@@ -148,6 +148,10 @@ public class ServerSettingsV1Adapter(ServerSettingsV1 _delegate) : IServerSettin
         public string Language => _delegate.Language;
         public bool SnapAudio => _delegate.SnapAudio;
         public string? SnapserverUrl => _delegate.SnapserverUrl;
+        public string? OidcAuthority => null;
+        public string? OidcClientId => null;
+        public string? OidcScopes => null;
+        public bool OidcProtectFrame => false;
 
         public void Validate() { }
     }
