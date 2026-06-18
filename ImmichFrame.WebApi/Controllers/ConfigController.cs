@@ -61,13 +61,14 @@ namespace ImmichFrame.WebApi.Controllers
         {
             try
             {
-                var warning = _configSaveService.Save(settings);
-                if (warning is not null)
+                var result = _configSaveService.Save(settings);
+                if (result.Warning is not null)
+                    _logger.LogWarning("Settings not fully persisted: {Warning}", result.Warning);
+                return Ok(new
                 {
-                    _logger.LogWarning("Settings applied in memory but not persisted: {Warning}", warning);
-                    return Ok(new { message = warning });
-                }
-                return Ok(new { message = "Settings saved. Account changes require a server restart." });
+                    message = result.Warning ?? "Settings saved. Account changes require a server restart.",
+                    envVars = result.EnvVars
+                });
             }
             catch (Exception ex)
             {

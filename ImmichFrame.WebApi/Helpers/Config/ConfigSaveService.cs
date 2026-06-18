@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 using ImmichFrame.Core.Interfaces;
 using ImmichFrame.WebApi.Models;
@@ -5,19 +6,28 @@ using YamlDotNet.Serialization;
 
 namespace ImmichFrame.WebApi.Helpers.Config;
 
-public class ConfigSaveService(ConfigPathProvider pathProvider, IServerSettings serverSettings)
+public record SaveResult(string? Warning, string? EnvVars);
+
+public class ConfigSaveService(ConfigPathProvider pathProvider, IServerSettings serverSettings, ConfigSourceProvider configSource)
 {
     /// <summary>
     /// Applies <paramref name="updated"/> in memory immediately, then attempts to persist to disk.
+    /// When the config was loaded from env vars, returns a suggested env var block instead of
+    /// (or in addition to) writing a file.
     /// </summary>
-    /// <returns>
-    /// <c>null</c> on full success; a human-readable warning string when the in-memory update
-    /// succeeded but the file could not be written (e.g. read-only filesystem).
-    /// </returns>
-    public string? Save(ServerSettings updated)
+    public SaveResult Save(ServerSettings updated)
     {
         // Always apply in memory first so settings take effect regardless of disk state.
         UpdateGeneralSettingsInMemory(updated.GeneralSettingsImpl ?? new GeneralSettings());
+
+        // When using env vars, generate the updated block and return it — no file to write.
+        if (configSource.Source is ConfigSource.NewEnvVars or ConfigSource.LegacyEnvVars)
+        {
+            return new SaveResult(
+                Warning: "Settings applied for this session. To persist, update your environment variables as shown below.",
+                EnvVars: SerializeToEnvVars(updated)
+            );
+        }
 
         try
         {
@@ -49,13 +59,54 @@ public class ConfigSaveService(ConfigPathProvider pathProvider, IServerSettings 
                 File.WriteAllText(targetPath, serializer.Serialize(updated));
             }
 
-            return null;
+            return new SaveResult(Warning: null, EnvVars: null);
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
         {
-            return $"Settings applied for this session but could not be saved to disk: {ex.Message}";
+            return new SaveResult(
+                Warning: $"Settings applied for this session but could not be saved to disk: {ex.Message}",
+                EnvVars: null
+            );
         }
     }
+
+    private static string SerializeToEnvVars(ServerSettings settings)
+    {
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.Instance;
+        var lines = new List<string>();
+
+        var general = settings.GeneralSettingsImpl ?? new GeneralSettings();
+        foreach (var prop in typeof(GeneralSettings).GetProperties(flags))
+        {
+            var line = PropToEnvVar($"General__{prop.Name}", prop.GetValue(general));
+            if (line != null) lines.Add(line);
+        }
+
+        var accounts = (settings.AccountsImpl ?? []).ToList();
+        for (int i = 0; i < accounts.Count; i++)
+        {
+            foreach (var prop in typeof(ServerAccountSettings).GetProperties(flags))
+            {
+                var line = PropToEnvVar($"Accounts__{i}__{prop.Name}", prop.GetValue(accounts[i]));
+                if (line != null) lines.Add(line);
+            }
+        }
+
+        return string.Join("\n", lines);
+    }
+
+    private static string? PropToEnvVar(string key, object? value) => value switch
+    {
+        null => null,
+        string s when string.IsNullOrEmpty(s) => null,
+        List<string> list when list.Count == 0 => null,
+        List<Guid> list when list.Count == 0 => null,
+        List<string> list => $"{key}={string.Join(",", list)}",
+        List<Guid> list => $"{key}={string.Join(",", list)}",
+        bool b => $"{key}={b.ToString().ToLowerInvariant()}",
+        DateTime dt => $"{key}={dt:yyyy-MM-dd}",
+        _ => $"{key}={value}"
+    };
 
     private void UpdateGeneralSettingsInMemory(GeneralSettings src)
     {

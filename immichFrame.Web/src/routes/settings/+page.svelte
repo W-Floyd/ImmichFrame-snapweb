@@ -11,6 +11,8 @@
 	let saving = $state(false);
 	let error = $state('');
 	let successMsg = $state('');
+	let envVars = $state<string | null>(null);
+	let envVarsCopied = $state(false);
 
 	const authsecret = page.url.searchParams.get('authsecret');
 	if (authsecret && authsecret !== $authSecretStore) {
@@ -32,9 +34,12 @@
 		saving = true;
 		error = '';
 		successMsg = '';
+		envVars = null;
 		try {
 			const result = await saveSettings(settings);
 			successMsg = result.message;
+			envVars = result.envVars ?? null;
+			envVarsCopied = false;
 		} catch (e: unknown) {
 			error = e instanceof Error ? e.message : String(e);
 		} finally {
@@ -447,6 +452,28 @@
 					</div>
 				{/each}
 			</section>
+
+			<!-- Env vars suggestion panel -->
+			{#if envVars}
+				<div class="rounded-lg border border-yellow-500/40 bg-yellow-500/10 p-4 space-y-3">
+					<div class="flex items-start justify-between gap-4">
+						<p class="text-sm text-yellow-300">
+							Settings applied for this session. To persist across restarts, update your environment variables:
+						</p>
+						<button
+							onclick={() => { navigator.clipboard.writeText(envVars!); envVarsCopied = true; }}
+							class="shrink-0 rounded px-3 py-1 text-xs font-medium border transition-colors"
+							class:border-green-500={envVarsCopied}
+							class:text-green-400={envVarsCopied}
+							class:border-yellow-500={!envVarsCopied}
+							class:text-yellow-300={!envVarsCopied}
+						>
+							{envVarsCopied ? '✓ Copied' : 'Copy'}
+						</button>
+					</div>
+					<pre class="overflow-x-auto rounded bg-black/40 p-3 text-xs text-white/80 leading-relaxed">{envVars}</pre>
+				</div>
+			{/if}
 
 			<!-- Bottom save bar -->
 			<div class="flex items-center justify-end gap-3 pb-8">

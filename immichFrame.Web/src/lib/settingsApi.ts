@@ -75,7 +75,7 @@ export async function getFullSettings(): Promise<FullSettingsDto> {
 	return res.json();
 }
 
-export async function saveSettings(settings: FullSettingsDto): Promise<{ message: string }> {
+export async function saveSettings(settings: FullSettingsDto): Promise<{ message: string; envVars?: string }> {
 	const res = await fetch('/api/Config', {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json', ...authHeaders() },

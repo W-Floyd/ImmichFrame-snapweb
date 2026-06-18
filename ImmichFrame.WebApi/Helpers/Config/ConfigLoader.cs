@@ -8,7 +8,7 @@ using YamlDotNet.Serialization;
 
 namespace ImmichFrame.WebApi.Helpers.Config;
 
-public class ConfigLoader(ILogger<ConfigLoader> _logger)
+public class ConfigLoader(ILogger<ConfigLoader> _logger, ConfigSourceProvider _configSource)
 {
     private string FindConfigFile(string dir, params string[] fileNames)
     {
@@ -34,7 +34,9 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
         {
             try
             {
-                return LoadConfigJson<ServerSettings>(jsonConfigPath);
+                var result = LoadConfigJson<ServerSettings>(jsonConfigPath);
+                _configSource.Source = ConfigSource.File;
+                return result;
             }
             catch (Exception e)
             {
@@ -44,6 +46,7 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
             try
             {
                 var v1 = LoadConfigJson<ServerSettingsV1>(jsonConfigPath);
+                _configSource.Source = ConfigSource.File;
                 return new ServerSettingsV1Adapter(v1);
             }
             catch (Exception e)
@@ -57,7 +60,9 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
         {
             try
             {
-                return LoadConfigYaml<ServerSettings>(ymlConfigPath);
+                var result = LoadConfigYaml<ServerSettings>(ymlConfigPath);
+                _configSource.Source = ConfigSource.File;
+                return result;
             }
             catch (Exception e)
             {
@@ -67,6 +72,7 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
             try
             {
                 var v1 = LoadConfigYaml<ServerSettingsV1>(ymlConfigPath);
+                _configSource.Source = ConfigSource.File;
                 return new ServerSettingsV1Adapter(v1);
             }
             catch (Exception e)
@@ -78,7 +84,11 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
         try
         {
             var result = LoadConfigFromNewEnvFormat(Environment.GetEnvironmentVariables());
-            if (result != null) return result;
+            if (result != null)
+            {
+                _configSource.Source = ConfigSource.NewEnvVars;
+                return result;
+            }
         }
         catch (Exception e)
         {
@@ -88,6 +98,7 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger)
         try
         {
             var v1 = LoadConfigFromDictionary<ServerSettingsV1>(Environment.GetEnvironmentVariables());
+            _configSource.Source = ConfigSource.LegacyEnvVars;
             return new ServerSettingsV1Adapter(v1);
         }
         catch (Exception e)

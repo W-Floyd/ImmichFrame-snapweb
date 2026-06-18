@@ -50,6 +50,7 @@ var configPath = Environment.GetEnvironmentVariable("IMMICHFRAME_CONFIG_PATH") ?
         Directory.EnumerateDirectories(AppDomain.CurrentDomain.BaseDirectory, "*", SearchOption.TopDirectoryOnly)
         .FirstOrDefault(d => string.Equals(Path.GetFileName(d), "Config", StringComparison.OrdinalIgnoreCase))
         ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config");
+builder.Services.AddSingleton<ConfigSourceProvider>();
 builder.Services.AddTransient<ConfigLoader>();
 builder.Services.AddSingleton(new ConfigPathProvider(configPath));
 builder.Services.AddSingleton<IServerSettings>(srv => srv.GetRequiredService<ConfigLoader>().LoadConfig(configPath));
