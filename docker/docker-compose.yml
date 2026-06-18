@@ -4,12 +4,79 @@ services:
     container_name: immichframe
     image: ghcr.io/immichframe/immichframe:latest
     restart: on-failure
-    # volumes:
-    #   - PATH/TO/CONFIG:/app/Config
-    #   - PATH/TO/CUSTOMCSS/custom.css:/app/wwwroot/static/custom.css
     ports:
       - "8080:8080"
-    env_file:
-      - .env
     environment:
       TZ: "Europe/Berlin"
+
+      # ── Option A: mount a config file (JSON or YAML) ──────────────────────
+      # Uncomment the volumes block below and remove the env vars in Option B.
+      # IMMICHFRAME_CONFIG_PATH: /config
+
+      # ── Option B: configure entirely via environment variables ────────────
+      # Use General__ for display/behaviour settings.
+      # Use Accounts__N__ (0-based) for each Immich server account.
+      # Multiple accounts are supported by incrementing the index.
+
+      General__Interval: "45"
+      General__TransitionDuration: "1"
+      General__Language: "en"
+      General__Layout: "splitview"
+      # General__AuthenticationSecret: ""
+      # General__DownloadImages: "false"
+      # General__RenewImagesDuration: "30"
+      # General__RefreshAlbumPeopleInterval: "12"
+      # General__ShowClock: "true"
+      # General__ClockFormat: "hh:mm"
+      # General__ClockDateFormat: "eee, MMM d"
+      # General__ShowProgressBar: "true"
+      # General__ShowPhotoDate: "true"
+      # General__PhotoDateFormat: "MM/dd/yyyy"
+      # General__ShowImageDesc: "true"
+      # General__ShowPeopleDesc: "true"
+      # General__ShowTagsDesc: "true"
+      # General__ShowAlbumName: "true"
+      # General__ShowImageLocation: "true"
+      # General__ImageLocationFormat: "City,State,Country"
+      # General__PrimaryColor: "#f5deb3"
+      # General__SecondaryColor: "#000000"
+      # General__Style: "none"
+      # General__BaseFontSize: "17px"
+      # General__ImageZoom: "true"
+      # General__ImagePan: "false"
+      # General__ImageFill: "false"
+      # General__PlayAudio: "false"
+      # General__SnapAudio: "false"
+      # General__SnapserverUrl: ""
+      # General__WeatherApiKey: ""
+      # General__ShowWeatherDescription: "true"
+      # General__WeatherIconUrl: "https://openweathermap.org/img/wn/{IconId}.png"
+      # General__UnitSystem: "imperial"
+      # General__WeatherLatLong: "40.7128,74.0060"
+      # General__Webhook: ""
+      # General__Webcalendars: "https://calendar.example.com/basic.ics"
+
+      # Account 0 (required)
+      Accounts__0__ImmichServerUrl: "https://immich.example.com"
+      Accounts__0__ApiKey: "your-api-key"
+      # Accounts__0__ApiKeyFile: "/run/secrets/immich_api_key"
+      # Accounts__0__ShowMemories: "false"
+      # Accounts__0__ShowFavorites: "false"
+      # Accounts__0__ShowArchived: "false"
+      # Accounts__0__ShowVideos: "false"
+      # Accounts__0__ImagesFromDays: ""
+      # Accounts__0__ImagesFromDate: ""
+      # Accounts__0__ImagesUntilDate: ""
+      # Accounts__0__Albums: "uuid1,uuid2"
+      # Accounts__0__ExcludedAlbums: ""
+      # Accounts__0__People: ""
+      # Accounts__0__Tags: ""
+      # Accounts__0__Rating: ""
+
+      # Account 1 (optional — add more by incrementing the index)
+      # Accounts__1__ImmichServerUrl: "https://immich2.example.com"
+      # Accounts__1__ApiKey: "your-second-api-key"
+
+    # volumes:
+    #   - /path/to/config:/config          # used with Option A above
+    #   - /path/to/custom.css:/app/wwwroot/static/custom.css
