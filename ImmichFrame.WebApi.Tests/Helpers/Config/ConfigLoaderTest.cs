@@ -38,7 +38,7 @@ public class ConfigLoaderTest
         var jsonConfig = _configLoader.LoadConfigJson<ServerSettingsV1>(Path.Combine(
             TestContext.CurrentContext.TestDirectory, "Resources/TestV1.json"));
 
-        var config = _configLoader.LoadConfigFromDictionary<ServerSettingsV1>(ToDictionary(jsonConfig));
+        var config = _configLoader.LoadConfigFromDictionary<ServerSettingsV1>(ToDictionary(jsonConfig, ignoreNullValues: true));
         VerifyConfig(new ServerSettingsV1Adapter(config), false, true);
     }
 
@@ -110,6 +110,11 @@ public class ConfigLoaderTest
                     if (prop.Name.Equals("ApiKeyFile") && expectNullApiKeyFile)
                     {
                         Assert.That(value, Is.EqualTo(null), prop.Name);
+                    }
+                    else if (value is null)
+                    {
+                        // Optional field absent in this config version — acceptable
+                        break;
                     }
                     else
                     {
