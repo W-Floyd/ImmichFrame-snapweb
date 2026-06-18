@@ -106,7 +106,13 @@ public class ConfigLoader(ILogger<ConfigLoader> _logger, ConfigSourceProvider _c
             _logger.LogWarning("Failed to load config as env vars ({errorMessage})", e.Message);
         }
 
-        throw new ImmichFrameException("Failed to load configuration");
+        _logger.LogWarning("No configuration found; starting with empty defaults. Open /settings to configure.");
+        _configSource.Source = ConfigSource.Unknown;
+        return new ServerSettings
+        {
+            GeneralSettingsImpl = new GeneralSettings(),
+            AccountsImpl = []
+        };
     }
 
     // Loads settings from env vars using the namespaced format:

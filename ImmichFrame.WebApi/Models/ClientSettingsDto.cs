@@ -34,6 +34,7 @@ public class ClientSettingsDto
     public string Language { get; set; }
     public bool SnapAudio { get; set; }
     public string? SnapserverUrl { get; set; }
+    public bool Configured { get; set; } = true;
 
     public static ClientSettingsDto FromGeneralSettings(IGeneralSettings generalSettings)
     {

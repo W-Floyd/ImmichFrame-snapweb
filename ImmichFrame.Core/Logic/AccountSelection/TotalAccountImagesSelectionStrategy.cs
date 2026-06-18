@@ -16,6 +16,7 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
 
     public async Task<(IAccountImmichFrameLogic, AssetResponseDto)?> GetNextAsset()
     {
+        if (_accounts.Count == 0) return null;
         var chosen = await _accounts.ChooseOne(logic => logic.GetTotalAssets());
         
         var asset = await chosen.GetNextAsset();
@@ -48,6 +49,7 @@ public class TotalAccountImagesSelectionStrategy(ILogger<TotalAccountImagesSelec
 
     public async Task<IEnumerable<(IAccountImmichFrameLogic, AssetResponseDto)>> GetAssets()
     {
+        if (_accounts.Count == 0) return [];
         var proportions = await GetProportions(_accounts);
         var maxAccount = proportions.Max();
         var adjustedProportions = proportions.Select(x => x / maxAccount).ToList();

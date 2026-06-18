@@ -28,7 +28,9 @@ namespace ImmichFrame.WebApi.Controllers
         {
             var sanitizedClientIdentifier = clientIdentifier.SanitizeString();
             _logger.LogDebug("Config requested by '{sanitizedClientIdentifier}'", sanitizedClientIdentifier);
-            return ClientSettingsDto.FromGeneralSettings(_settings);
+            var dto = ClientSettingsDto.FromGeneralSettings(_settings);
+            dto.Configured = _serverSettings.Accounts.Any();
+            return dto;
         }
 
         [HttpGet("Version", Name = "GetVersion")]
